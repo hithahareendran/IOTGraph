@@ -1,0 +1,68 @@
+﻿@{
+    ViewBag.Title = "IOT Chart";
+}
+
+
+<script>
+    window.onload = function () {
+
+        // Initial Values
+        var xValue = 0;
+        var yValue = 10;
+        var newDataCount = 6;
+        dataPoints = [];
+
+        var chart = new CanvasJS.Chart("chartContainer", {
+            theme: "light2",
+            title: {
+                text: "Temperature vs Humidity on Device"
+            },
+            subtitles: [
+                { text: "Try Resizing the Browser" }
+            ],
+            axisX: {
+                title: "Humidity"
+            },
+            axisY: {
+                title: "Temperature",
+                suffix: " C",
+            },
+            data: [{
+                type: "splineArea", //change type to column bar, line, area, pie, etc
+                yValueFormatString: "#,##0.## C",
+                dataPoints: dataPoints
+            }]
+        });
+
+        updateData();
+
+        function addData(data) {
+            if (newDataCount !== 1) {
+                $.each(data, function (key, value) {
+                    dataPoints.push({ x: value.x, y: parseFloat(value.y) });
+                    xValue++;
+                    yValue = parseFloat(value.y);
+                });
+                newDataCount = 1;
+            } else {
+                //dataPoints.shift();
+                dataPoints.push({ x: data[0].x, y: parseFloat(data[0].y) });
+                xValue++;
+                yValue = parseFloat(data[0].y);
+            }
+            chart.render();
+            setTimeout(updateData, 3000);
+        }
+
+        function updateData() {
+            $.getJSON("/home/json?xstart=" + xValue + "&ystart=" + yValue + "&length=" + newDataCount, addData);
+        }
+
+    }
+</script>
+
+<div id="chartContainer">
+    <script src="https://canvasjs.com/assets/script/jquery-1.11.1.min.js"></script>
+    <script src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script>
+
+</div>
